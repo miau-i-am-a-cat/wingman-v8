@@ -1935,6 +1935,7 @@ footer { border-top: 1px solid var(--grid-line-strong); padding: 48px 40px; }
   // Manifest rows — desktop: hover, mobile: tap
   // Scramble synced to movement 6 (500ms) so text decodes as it fades in
   const canHover = window.matchMedia('(hover: hover)').matches;
+  const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
   function closeAllRows() {
     document.querySelectorAll('.manifest-row.is-open').forEach(r => {
@@ -1950,7 +1951,7 @@ footer { border-top: 1px solid var(--grid-line-strong); padding: 48px 40px; }
     const scrambler = new TextScramble(descInner);
     descInner._scrambler = scrambler;
 
-    if (canHover) {
+    if (canHover && !isTouch) {
       let scrambleTimer = null;
       row.addEventListener('mouseenter', () => {
         row.classList.add('is-open');
@@ -1961,22 +1962,20 @@ footer { border-top: 1px solid var(--grid-line-strong); padding: 48px 40px; }
         if (scrambleTimer) clearTimeout(scrambleTimer);
         scrambler.reset();
       });
-    } else {
-      row.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const wasOpen = row.classList.contains('is-open');
-        closeAllRows();
-        if (!wasOpen) {
-          row.classList.add('is-open');
-          setTimeout(() => scrambler.scramble(), 500);
-        }
-      });
     }
+
+    row.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const wasOpen = row.classList.contains('is-open');
+      closeAllRows();
+      if (!wasOpen) {
+        row.classList.add('is-open');
+        setTimeout(() => scrambler.scramble(), 500);
+      }
+    });
   });
 
-  if (!canHover) {
-    document.addEventListener('click', closeAllRows);
-  }
+  document.addEventListener('click', closeAllRows);
 
   // ═══════════════════════════════════════════════════
   // SCROLL RULER — progress tracker
@@ -2025,4 +2024,3 @@ footer { border-top: 1px solid var(--grid-line-strong); padding: 48px 40px; }
 </script>
 </body>
 </html>
-<!-- Sat Feb  7 03:39:14 PST 2026 -->
